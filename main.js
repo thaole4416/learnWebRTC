@@ -14,12 +14,40 @@ function main() {
       navigator.webkitGetUserMedia ||
       navigator.mozGetUserMeida ||
       navigator.msGetUserMedia;
-    navigator.getUserMedia({ video: true, audio: true }, function (stream) {
-        let video = document.querySelector('video');
-        video.src = window.URL.createObjectURL(video);
-    }, function (err) {
-        alert('error', err)
-    });
+    let constraints = {
+      video: {
+        mandatory: {
+          minWidth: 640,
+          minHeight: 480,
+        },
+      },
+      audio: true,
+    };
+    if (
+      /Android|WebOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      )
+    ) {
+      constraints = {
+        video: {
+          minWidth: 480,
+          minHeight: 320,
+          maxWidth: 1024,
+          maxHeight: 768,
+        },
+        audio: true,
+      };
+    }
+    navigator.getUserMedia(
+      constraints,
+      function (stream) {
+        let video = document.querySelector("video");
+        video.src = window.URL.createObjectURL(stream);
+      },
+      function (err) {
+        alert("error", err);
+      }
+    );
   } else {
     alert("Sorry, your browser does not support getUserMedia.");
   }
