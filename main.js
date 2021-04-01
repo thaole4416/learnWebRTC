@@ -51,11 +51,24 @@ function handleMultipleDevices() {
 function startPeerConnection() {
   const configuration = {
     //Uncomment this code to add custom iceServers
-    //"iceServers": [{"url" : "stun:stun.1.google.com:19302"}]
+    //"iceServers": [{"url" : "stun:127.0.0.1:9876"}]
   };
   yourConnection = new webkitRTCPeerConnection(configuration);
   theirConnection = new webkitRTCPeerConnection(configuration);
 
+  // setup ice handling
+  yourConnection.onicecandidate = function (event) {
+    if (event.candidate) {
+      theirConnection.addIceCandidate(new RTCIceCandidate(event.candidate));
+    }
+  };
+  theirConnection.onicecandidate = function (event) {
+    if (event.candidate) {
+      yourConnection.addIceCandidate(new RTCIceCandidate(event.candidate));
+    }
+  };
+
+  // begin the offer
   yourConnection.createOffer().then((offer) => {
     yourConnection.setLocalDesciption(offer);
     theirConnection.setRemoteDescription(offer);
