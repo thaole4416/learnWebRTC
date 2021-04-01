@@ -48,7 +48,7 @@ function handleMultipleDevices() {
   });
 }
 
-function startPeerConnection() {
+function startPeerConnection(stream) {
   const configuration = {
     //Uncomment this code to add custom iceServers
     //"iceServers": [{"url" : "stun:127.0.0.1:9876"}]
@@ -78,6 +78,12 @@ function startPeerConnection() {
       yourConnection.setRemoteDescription(offer);
     });
   });
+
+  // setup streaming listening
+  yourConnection.addTrack(stream);
+  theirConnection.ontrack = (e) => {
+    theirVideo.srcObject = e.stream;
+  };
 }
 
 function main() {
