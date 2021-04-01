@@ -7,6 +7,14 @@ function hasUserMedia() {
   );
 }
 
+function hasRTCPeerConnection() {
+  window.RTCPeerConnection =
+    window.RTCPeerConnection ||
+    window.webkitRTCPeerConnection ||
+    window.mozRTCPeerConnection;
+  return !!window.RTCPeerConnection;
+}
+
 function handleMultipleDevices() {
   navigator.mediaDevices.enumerateDevices().then(function (sources) {
     var audioSource = null;
@@ -40,50 +48,39 @@ function handleMultipleDevices() {
   });
 }
 
+function startPeerConnection() {
+  const configuration = {
+    //Uncomment this code to add custom iceServers
+    //"iceServers": [{"url" : "stun:stun.1.google.com:19302"}]
+  };
+  yourConnection = new webkitRTCPeerConnection(configuration);
+  theirConnection = new webkitRTCPeerConnection(configuration);
+}
+
 function main() {
+  const yourVideo = document.querySelector("#yours");
+  const theirVideo = document.querySelector("#theirs");
   if (hasUserMedia()) {
-    navigator.getUserMedia =
-      navigator.getUserMedia ||
-      navigator.webkitGetUserMedia ||
-      navigator.mozGetUserMeida ||
-      navigator.msGetUserMedia;
-    let constraints = {
-      video: {
-        mandatory: {
-          minWidth: 640,
-          minHeight: 480,
-        },
-      },
-      audio: true,
-    };
-    if (
-      /Android|WebOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      )
-    ) {
-      constraints = {
-        video: {
-          minWidth: 480,
-          minHeight: 320,
-          maxWidth: 1024,
-          maxHeight: 768,
-        },
-        audio: true,
-      };
-    }
     navigator.getUserMedia(
-      constraints,
+      {
+        video: true,
+        audio: true,
+      },
       function (stream) {
-        let video = document.querySelector("video");
-        video.src = window.URL.createObjectURL(stream);
+        yourVideo.srcObject = stream;
+        if (hasRTCPeerConnection()) {
+          startPeerConnection(stream);
+        } else {
+          alert("sorry, we failed to capture your camera, please try again.");
+        }
       },
       function (err) {
-        alert("error", err);
+        alert(err);
       }
     );
   } else {
-    alert("Sorry, your browser does not support getUserMedia.");
+    alert("sorry, your browser does not support WebRTC");
   }
 }
 
-handleMultipleDevices();
+main();
