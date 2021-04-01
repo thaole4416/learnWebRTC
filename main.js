@@ -55,6 +55,16 @@ function startPeerConnection() {
   };
   yourConnection = new webkitRTCPeerConnection(configuration);
   theirConnection = new webkitRTCPeerConnection(configuration);
+
+  yourConnection.createOffer().then((offer) => {
+    yourConnection.setLocalDesciption(offer);
+    theirConnection.setRemoteDescription(offer);
+
+    theirConnection.createAnswer().then((offer) => {
+      theirConnection.setLocalDesciption(offer);
+      yourConnection.setRemoteDescription(offer);
+    });
+  });
 }
 
 function main() {
