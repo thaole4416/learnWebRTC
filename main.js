@@ -68,33 +68,39 @@ function startPeerConnection(stream) {
     }
   };
 
+  // setup streaming listening
+  const [track] = stream.getTracks();
+  yourConnection.addTrack(track);
+  let inboundStream = null;
+  const theirVideo = document.querySelector("#theirs");
+  theirConnection.ontrack = (ev) => {
+    if (ev.streams && ev.streams[0]) {
+      theirVideo.srcObject = ev.streams[0];
+    } else {
+      if (!inboundStream) {
+        inboundStream = new MediaStream();
+        theirVideo.srcObject = inboundStream;
+      }
+      inboundStream.addTrack(ev.track);
+    }
+  };
+
   // begin the offer
   yourConnection.createOffer().then((offer) => {
-    yourConnection.setLocalDesciption(offer);
+    yourConnection.setLocalDescription(offer);
     theirConnection.setRemoteDescription(offer);
-
     theirConnection.createAnswer().then((offer) => {
-      theirConnection.setLocalDesciption(offer);
+      theirConnection.setLocalDescription(offer);
       yourConnection.setRemoteDescription(offer);
     });
   });
-
-  // setup streaming listening
-  yourConnection.addTrack(stream);
-  theirConnection.ontrack = (e) => {
-    theirVideo.srcObject = e.stream;
-  };
 }
 
 function main() {
   const yourVideo = document.querySelector("#yours");
-  const theirVideo = document.querySelector("#theirs");
   if (hasUserMedia()) {
     navigator.getUserMedia(
-      {
-        video: true,
-        audio: true,
-      },
+      { video: true, audio: false },
       function (stream) {
         yourVideo.srcObject = stream;
         if (hasRTCPeerConnection()) {
