@@ -7,22 +7,35 @@
       href="https://www.gstatic.com/devrel-devsite/prod/v3069b08f6c9d146fa6a9c7f184b2836998ab5f12cefec1342a7bf6dca024aa94/webrtc/images/touchicon-180.png"
       type="image/x-icon"
     />
-    <title>Basic WebRtc app</title>
+    <title>WebRtc app</title>
     <style>
       body {
         background-color: #3d6df2;
         margin-top: 15px;
+        font-family: sans-serif;
+        color: white;
       }
       video {
         background: black;
         border: 1px solid gray;
       }
-      #container {
+      .page {
         position: relative;
         display: block;
         margin: 0 auto;
         width: 500px;
         height: 500px;
+      }
+      #list {
+        list-style-type: none;
+        padding-left: 0;
+      }
+      #list li  {
+        border-bottom: 1px solid white;
+        padding: 10px 0px;
+      }
+      #list li:hover  {
+        cursor: pointer;
       }
       #yours {
         width: 150px;
@@ -38,9 +51,18 @@
     </style>
   </head>
   <body>
-    <div id="container">
-      <video id="yours" autoplay></video><video id="theirs" autoplay></video>
+    <div id="login-page" class="page">
+      <h2>Login As</h2>
+      <input type="text" id="username" /><button id="login">Login</button>
     </div>
-    <script src="main.js"></script>
+    <div id="call-page" class="page">
+      <video id="yours" autoplay></video><video id="theirs" autoplay></video>
+      <ul id="list">
+        
+      </ul>
+      <input type="text" id="their-username" />
+      <button id="call">Call</button><button id="hang-up">Hang Up</button>
+    </div>
+    <script src="client.js"></script>
   </body>
 </html>

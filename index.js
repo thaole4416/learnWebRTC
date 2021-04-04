@@ -6,6 +6,10 @@ function sendTo(conn, message) {
   conn.send(JSON.stringify(message));
 }
 
+function sendBoardcast(wss, msg) {
+  wss.clients.forEach((conn) => conn.send(JSON.stringify(msg)));
+}
+
 wss.on("connection", function (conn) {
   console.log("user connected");
   conn.on("message", function (message) {
@@ -16,16 +20,6 @@ wss.on("connection", function (conn) {
       data = {};
     }
     switch (data.type) {
-      case "list": {
-        sendTo(conn, {
-          type: "list",
-          message: Object.values(users).map((c) => ({
-            name: c.name,
-            otherName: c.otherName,
-          })),
-        });
-        break;
-      }
       case "login": {
         console.log(`user logged in as ${data.name}`);
         if (users[data.name]) {
@@ -39,6 +33,14 @@ wss.on("connection", function (conn) {
           sendTo(conn, {
             type: "login",
             success: true,
+          });
+          console.log("login success");
+          sendBoardcast(wss, {
+            type: "list",
+            message: Object.values(users).map((c) => ({
+              name: c.name,
+              otherName: c.otherName,
+            })),
           });
         }
         break;
@@ -88,6 +90,13 @@ wss.on("connection", function (conn) {
             type: "candidate",
             candidate: data.candidate,
           });
+          sendBoardcast(wss, {
+            type: "list",
+            message: Object.values(users).map((c) => ({
+              name: c.name,
+              otherName: c.otherName,
+            })),
+          });
         }
         break;
       }
@@ -100,6 +109,13 @@ wss.on("connection", function (conn) {
             type: "leave",
           });
         }
+        sendBoardcast(wss, {
+          type: "list",
+          message: Object.values(users).map((c) => ({
+            name: c.name,
+            otherName: c.otherName,
+          })),
+        });
         break;
       }
       default: {
@@ -126,5 +142,12 @@ wss.on("connection", function (conn) {
         }
       }
     }
+    sendBoardcast(wss, {
+      type: "list",
+      message: Object.values(users).map((c) => ({
+        name: c.name,
+        otherName: c.otherName,
+      })),
+    });
   });
 });
